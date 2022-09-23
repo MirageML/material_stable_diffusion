@@ -199,13 +199,14 @@ class StableDiffusionImg2ImgPipeline(DiffusionPipeline):
         image = image.cpu().permute(0, 2, 3, 1).numpy()
 
         # run safety checker
-        safety_cheker_input = self.feature_extractor(
-            self.numpy_to_pil(image), return_tensors="pt"
-        ).to(self.device)
-        image, has_nsfw_concept = self.safety_checker(
-            images=image, clip_input=safety_cheker_input.pixel_values
-        )
+        # safety_cheker_input = self.feature_extractor(
+        #     self.numpy_to_pil(image), return_tensors="pt"
+        # ).to(self.device)
+        # image, has_nsfw_concept = self.safety_checker(
+        #     images=image, clip_input=safety_cheker_input.pixel_values
+        # )
 
+        has_nsfw_concept = [False] * len(image)
         image = self.numpy_to_pil(image)
 
         return {"sample": image, "nsfw_content_detected": has_nsfw_concept}

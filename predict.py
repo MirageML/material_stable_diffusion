@@ -70,7 +70,7 @@ class Predictor(BasePredictor):
             default=0.8,
         ),
         num_outputs: int = Input(
-            description="Number of images to output", choices=[1, 4], default=1
+            description="Number of images to output", choices=[1, 2, 3, 4, 5, 6, 7, 8, 9], default=1
         ),
         num_inference_steps: int = Input(
             description="Number of denoising steps", ge=1, le=500, default=50
@@ -129,8 +129,49 @@ class Predictor(BasePredictor):
 
         output_paths = []
         for i, sample in enumerate(output["sample"]):
-            output_path = f"/tmp/out-{i}.png"
+            output_path = f"output/out-{i}.png"
             sample.save(output_path)
             output_paths.append(Path(output_path))
 
         return output_paths
+
+
+import argparse
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser("Inference")
+    parser.add_argument("--prompt", type=str, default="A backpack", help="Prompt")
+    parser.add_argument("--num_outputs", type=int, default=1, help="Number of Images")
+    parser.add_argument("--init_image", type=str, default=None, help="Path to init image")
+
+    args, unknown_args = parser.parse_known_args()
+    os.makedirs("output", exist_ok=True)
+
+    predictor = Predictor()
+    predictor.setup()
+    if args.init_image:
+        predictor.predict(
+            prompt=args.prompt,
+            width=512,
+            height=512,
+            init_image=os.path.abspath(args.init_image),
+            mask=None,
+            prompt_strength=0.8,
+            num_outputs=args.num_outputs,
+            num_inference_steps=50,
+            guidance_scale=7.5,
+            seed=None
+        )
+    else:
+        predictor.predict(
+            prompt=args.prompt,
+            width=512,
+            height=512,
+            init_image=None,
+            mask=None,
+            prompt_strength=0.8,
+            num_outputs=args.num_outputs,
+            num_inference_steps=50,
+            guidance_scale=7.5,
+            seed=None
+        )
